@@ -1,6 +1,8 @@
 package com.simplyrugby.service;
 
+import com.simplyrugby.domain.GameStats;
 import com.simplyrugby.domain.Player;
+import com.simplyrugby.domain.TrainingAttendance;
 import com.simplyrugby.util.EntityNotFoundException;
 import com.simplyrugby.util.ValidationException;
 
@@ -20,14 +22,20 @@ public interface PlayerService {
      * @return List of all players
      */
     List<Player> getAllPlayers();
-    
+
+    List<Player> getPlayersByName(String name);
+
     /**
      * Get players in a specific squad
      * @param squadId The squad ID
      * @return List of players in the squad
      */
     List<Player> getPlayersBySquad(int squadId);
-    
+
+    List<Player> getPlayersByPosition(String position);
+
+    List<Player> getPlayersByAgeGrade(String ageGrade);
+
     /**
      * Add a new player
      * @param player The player to add
@@ -69,4 +77,20 @@ public interface PlayerService {
      * @throws EntityNotFoundException If the player does not exist
      */
     boolean removePlayerFromSquad(int playerId);
+
+    boolean setEmergencyContact(int playerId, int emergencyContactId);
+
+    List<Player> getPlayersWithStatsByGame(int gameId);
+
+    List<Player> getPlayersWithAttendanceByTraining(int trainingId);
+
+    List<GameStats> getPlayerGameStats(int playerId);
+
+    List<TrainingAttendance> getPlayerTrainingAttendance(int playerId);
+
+    double calculateOverallSkillRating(int playerId);
+
+    double calculateTrainingAttendanceRate(int playerId);
+
+    void validatePlayer(Player player);
 }

@@ -65,7 +65,7 @@ public interface GameService {
      * Get games between two dates
      *
      * @param startDate The start date
-     * @param endDate The end date
+     * @param endDate   The end date
      * @return List of games between the dates
      */
     List<Game> getGamesBetweenDates(Date startDate, Date endDate);
@@ -84,7 +84,7 @@ public interface GameService {
      *
      * @param game The game to update
      * @return True if the update was successful
-     * @throws ValidationException If the game data is invalid
+     * @throws ValidationException     If the game data is invalid
      * @throws EntityNotFoundException If the game doesn't exist
      */
     boolean updateGame(Game game);
@@ -103,7 +103,7 @@ public interface GameService {
      *
      * @param stats The game statistics to add
      * @return True if the addition was successful
-     * @throws ValidationException If the statistics data is invalid
+     * @throws ValidationException     If the statistics data is invalid
      * @throws EntityNotFoundException If the player or game doesn't exist
      */
     boolean addGameStats(GameStats stats);
@@ -113,7 +113,7 @@ public interface GameService {
      *
      * @param stats The game statistics to update
      * @return True if the update was successful
-     * @throws ValidationException If the statistics data is invalid
+     * @throws ValidationException     If the statistics data is invalid
      * @throws EntityNotFoundException If the statistics record doesn't exist
      */
     boolean updateGameStats(GameStats stats);
@@ -139,18 +139,45 @@ public interface GameService {
     /**
      * Get game statistics for a specific player in a specific game
      *
-     * @param gameId The game ID
+     * @param gameId   The game ID
      * @param playerId The player ID
      * @return The game statistics or null if not found
      * @throws EntityNotFoundException If the game or player doesn't exist
      */
     GameStats getPlayerGameStats(int gameId, int playerId);
 
-    /**
-     * Get upcoming games (games in the future)
-     *
-     * @return List of upcoming games
-     */
     List<Game> getUpcomingGames();
 
-/**
+    /**
+     * Get recent games (games in the past, ordered by date descending)
+     *
+     * @param limit The maximum number of games to return
+     * @return List of recent games
+     */
+    List<Game> getRecentGames(int limit);
+
+    /**
+     * Get the win/loss/draw record for a squad
+     *
+     * @param squadId The squad ID
+     * @return Array with [wins, losses, draws]
+     * @throws EntityNotFoundException If the squad doesn't exist
+     */
+    int[] getSquadRecord(int squadId);
+
+    /**
+     * Validate game data
+     *
+     * @param game The game to validate
+     * @throws ValidationException If the game data is invalid
+     */
+    void validateGame(Game game);
+
+    /**
+     * Validate game statistics data
+     *
+     * @param stats The game statistics to validate
+     * @throws ValidationException If the statistics data is invalid
+     */
+    void validateGameStats(GameStats stats);
+}

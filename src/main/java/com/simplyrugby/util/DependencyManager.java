@@ -28,6 +28,8 @@ public class DependencyManager {
         GameRepository gameRepository = new SQLiteGameRepository(connectionManager);
         TrainingRepository trainingRepository = new SQLiteTrainingRepository(connectionManager);
         UserRepository userRepository = new SQLiteUserRepository(connectionManager);
+        AnnouncementRepository announcementRepository = new SQLiteAnnouncementRepository(connectionManager);
+        ReportRepository reportRepository = new SQLiteReportRepository(connectionManager);
 
         // Initialize services
         MemberService memberService = new MemberServiceImpl(memberRepository);
@@ -38,6 +40,8 @@ public class DependencyManager {
         GameService gameService = new GameServiceImpl(gameRepository, playerRepository, squadRepository);
         TrainingService trainingService = new TrainingServiceImpl(trainingRepository, playerRepository, squadRepository);
         UserService userService = new UserServiceImpl(userRepository, memberRepository);
+        AnnouncementService announcementService = new AnnouncementServiceImpl(announcementRepository);
+        ReportService reportService = new ReportServiceImpl(reportRepository);
 
         // Register services in service locator
         ServiceLocator.register(MemberService.class, memberService);
@@ -47,6 +51,8 @@ public class DependencyManager {
         ServiceLocator.register(GameService.class, gameService);
         ServiceLocator.register(TrainingService.class, trainingService);
         ServiceLocator.register(UserService.class, userService);
+        ServiceLocator.register(AnnouncementService.class, announcementService);
+        ServiceLocator.register(ReportService.class, reportService);
     }
 
     /**
@@ -120,5 +126,13 @@ public class DependencyManager {
      */
     public static UserService getUserService() {
         return ServiceLocator.getService(UserService.class);
+    }
+
+    public static AnnouncementService getAnnouncementService() {
+        return ServiceLocator.getService(AnnouncementService.class);
+    }
+
+    public static ReportService getReportService() {
+        return ServiceLocator.getService(ReportService.class);
     }
 }

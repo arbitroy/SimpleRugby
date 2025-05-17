@@ -169,7 +169,7 @@ public class GameServiceImpl implements GameService {
     }
 
     // Helper method to validate game data
-    private void validateGame(Game game) {
+    public void validateGame(Game game) {
         List<String> errors = new ArrayList<>();
 
         // Validate date
@@ -211,7 +211,7 @@ public class GameServiceImpl implements GameService {
     }
 
     // Helper method to validate game stats data
-    private void validateGameStats(GameStats stats) {
+    public void validateGameStats(GameStats stats) {
         List<String> errors = new ArrayList<>();
 
         // Validate player ID
