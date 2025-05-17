@@ -1,6 +1,5 @@
 package com.simplyrugby.cli.secretary;
 
-import com.simplyrugby.cli.coach.CoachCommands;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
