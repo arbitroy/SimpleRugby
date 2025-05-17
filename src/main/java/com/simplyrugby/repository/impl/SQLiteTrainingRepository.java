@@ -20,24 +20,26 @@ public class SQLiteTrainingRepository implements TrainingRepository {
         this.connectionManager = connectionManager;
     }
     
+
     @Override
     public Training findById(int id) {
         String sql = "SELECT t.*, s.squadName, s.ageGrade FROM Training t " +
-                     "LEFT JOIN Squad s ON t.squadID = s.squadID " +
-                     "WHERE t.trainingID = ?";
-        
+                "LEFT JOIN Squad s ON t.squadID = s.squadID " +
+                "WHERE t.trainingID = ?";
+
         try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+
             pstmt.setInt(1, id);
             ResultSet rs = pstmt.executeQuery();
-            
+
             if (rs.next()) {
                 Training training = mapResultSetToTraining(rs);
-                
+
                 // Load attendance records
-                training.setAttendanceRecords(getAttendanceRecords(conn, id));
-                
+                List<TrainingAttendance> attendanceRecords = getAttendanceRecords(id);
+                training.setAttendanceRecords(attendanceRecords);
+
                 return training;
             }
             return null;
@@ -63,7 +65,7 @@ public class SQLiteTrainingRepository implements TrainingRepository {
             
             // Load attendance records for each training
             for (Training training : trainings) {
-                training.setAttendanceRecords(getAttendanceRecords(conn, training.getTrainingId()));
+                training.setAttendanceRecords(getAttendanceRecords(training.getTrainingId()));
             }
             
             return trainings;
@@ -92,7 +94,7 @@ public class SQLiteTrainingRepository implements TrainingRepository {
             
             // Load attendance records for each training
             for (Training training : trainings) {
-                training.setAttendanceRecords(getAttendanceRecords(conn, training.getTrainingId()));
+                training.setAttendanceRecords(getAttendanceRecords(training.getTrainingId()));
             }
             
             return trainings;
@@ -123,7 +125,7 @@ public class SQLiteTrainingRepository implements TrainingRepository {
             
             // Load attendance records for each training
             for (Training training : trainings) {
-                training.setAttendanceRecords(getAttendanceRecords(conn, training.getTrainingId()));
+                training.setAttendanceRecords(getAttendanceRecords(training.getTrainingId()));
             }
             
             return trainings;
@@ -154,7 +156,7 @@ public class SQLiteTrainingRepository implements TrainingRepository {
             
             // Load attendance records for each training
             for (Training training : trainings) {
-                training.setAttendanceRecords(getAttendanceRecords(conn, training.getTrainingId()));
+                training.setAttendanceRecords(getAttendanceRecords(training.getTrainingId()));
             }
             
             return trainings;
@@ -186,7 +188,7 @@ public class SQLiteTrainingRepository implements TrainingRepository {
             
             // Load attendance records for each training
             for (Training training : trainings) {
-                training.setAttendanceRecords(getAttendanceRecords(conn, training.getTrainingId()));
+                training.setAttendanceRecords(getAttendanceRecords(training.getTrainingId()));
             }
             
             return trainings;
@@ -355,20 +357,19 @@ public class SQLiteTrainingRepository implements TrainingRepository {
             throw new RepositoryException("Error updating attendance record", e);
         }
     }
-    
-    @Override
-    public List<TrainingAttendance> getAttendanceRecords(int trainingId) {
+
+
+    // Private helper method that accepts a Connection
+    private List<TrainingAttendance> getAttendanceRecordsInternal(Connection conn, int trainingId) throws SQLException {
         List<TrainingAttendance> records = new ArrayList<>();
         String sql = "SELECT ta.*, t.date FROM TrainingAttendance ta " +
-                     "JOIN Training t ON ta.trainingID = t.trainingID " +
-                     "WHERE ta.trainingID = ?";
-        
-        try (Connection conn = connectionManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+                "JOIN Training t ON ta.trainingID = t.trainingID " +
+                "WHERE ta.trainingID = ?";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, trainingId);
             ResultSet rs = pstmt.executeQuery();
-            
+
             while (rs.next()) {
                 TrainingAttendance attendance = new TrainingAttendance();
                 attendance.setAttendanceId(rs.getInt("attendanceID"));
@@ -376,7 +377,7 @@ public class SQLiteTrainingRepository implements TrainingRepository {
                 attendance.setTrainingId(rs.getInt("trainingID"));
                 attendance.setPresent(rs.getBoolean("present"));
                 attendance.setPlayerNotes(rs.getString("playerNotes"));
-                
+
                 // Set training date
                 try {
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -385,13 +386,21 @@ public class SQLiteTrainingRepository implements TrainingRepository {
                 } catch (ParseException e) {
                     throw new SQLException("Error parsing training date", e);
                 }
-                
+
                 records.add(attendance);
             }
-            
-            return records;
+        }
+
+        return records;
+    }
+
+    // Public method implementation required by the interface
+    @Override
+    public List<TrainingAttendance> getAttendanceRecords(int trainingId) {
+        try (Connection conn = connectionManager.getConnection()) {
+            return getAttendanceRecordsInternal(conn, trainingId);
         } catch (SQLException e) {
-            throw new RepositoryException("Error getting attendance records", e);
+            throw new RepositoryException("Error getting attendance records for training: " + trainingId, e);
         }
     }
     
@@ -493,7 +502,7 @@ public class SQLiteTrainingRepository implements TrainingRepository {
             
             // Load attendance records for each training
             for (Training training : trainings) {
-                training.setAttendanceRecords(getAttendanceRecords(conn, training.getTrainingId()));
+                training.setAttendanceRecords(getAttendanceRecords(training.getTrainingId()));
             }
             
             return trainings;
@@ -524,7 +533,7 @@ public class SQLiteTrainingRepository implements TrainingRepository {
             
             // Load attendance records for each training
             for (Training training : trainings) {
-                training.setAttendanceRecords(getAttendanceRecords(conn, training.getTrainingId()));
+                training.setAttendanceRecords(getAttendanceRecords(training.getTrainingId()));
             }
             
             return trainings;
@@ -553,7 +562,7 @@ public class SQLiteTrainingRepository implements TrainingRepository {
             
             // Load attendance records for each training
             for (Training training : trainings) {
-                training.setAttendanceRecords(getAttendanceRecords(conn, training.getTrainingId()));
+                training.setAttendanceRecords(getAttendanceRecords(training.getTrainingId()));
             }
             
             return trainings;

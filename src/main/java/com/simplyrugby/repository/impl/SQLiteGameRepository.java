@@ -19,25 +19,25 @@ public class SQLiteGameRepository implements GameRepository {
     public SQLiteGameRepository(ConnectionManager connectionManager) {
         this.connectionManager = connectionManager;
     }
-    
+
     @Override
     public Game findById(int id) {
         String sql = "SELECT g.*, s.squadName, s.ageGrade FROM Game g " +
-                     "LEFT JOIN Squad s ON g.squadID = s.squadID " +
-                     "WHERE g.gameID = ?";
-        
+                "LEFT JOIN Squad s ON g.squadID = s.squadID " +
+                "WHERE g.gameID = ?";
+
         try (Connection conn = connectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+
             pstmt.setInt(1, id);
             ResultSet rs = pstmt.executeQuery();
-            
+
             if (rs.next()) {
                 Game game = mapResultSetToGame(rs);
-                
-                // Load game stats
-                game.setGameStats(getGameStats(conn, id));
-                
+
+                // Load game stats using the public method
+                game.setGameStats(getGameStats(id));
+
                 return game;
             }
             return null;
@@ -45,27 +45,27 @@ public class SQLiteGameRepository implements GameRepository {
             throw new RepositoryException("Error finding game with ID: " + id, e);
         }
     }
-    
+
     @Override
     public List<Game> findAll() {
         List<Game> games = new ArrayList<>();
         String sql = "SELECT g.*, s.squadName, s.ageGrade FROM Game g " +
-                     "LEFT JOIN Squad s ON g.squadID = s.squadID";
-        
+                "LEFT JOIN Squad s ON g.squadID = s.squadID";
+
         try (Connection conn = connectionManager.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
-            
+
             while (rs.next()) {
                 Game game = mapResultSetToGame(rs);
                 games.add(game);
             }
-            
+
             // Load game stats for each game
             for (Game game : games) {
-                game.setGameStats(getGameStats(conn, game.getGameId()));
+                game.setGameStats(getGameStats(game.getGameId()));
             }
-            
+
             return games;
         } catch (SQLException e) {
             throw new RepositoryException("Error finding all games", e);
@@ -92,7 +92,7 @@ public class SQLiteGameRepository implements GameRepository {
             
             // Load game stats for each game
             for (Game game : games) {
-                game.setGameStats(getGameStats(conn, game.getGameId()));
+                game.setGameStats(getGameStats(game.getGameId()));
             }
             
             return games;
@@ -121,7 +121,7 @@ public class SQLiteGameRepository implements GameRepository {
             
             // Load game stats for each game
             for (Game game : games) {
-                game.setGameStats(getGameStats(conn, game.getGameId()));
+                game.setGameStats(getGameStats(game.getGameId()));
             }
             
             return games;
@@ -152,7 +152,7 @@ public class SQLiteGameRepository implements GameRepository {
             
             // Load game stats for each game
             for (Game game : games) {
-                game.setGameStats(getGameStats(conn, game.getGameId()));
+                game.setGameStats(getGameStats(game.getGameId()));
             }
             
             return games;
@@ -183,7 +183,7 @@ public class SQLiteGameRepository implements GameRepository {
             
             // Load game stats for each game
             for (Game game : games) {
-                game.setGameStats(getGameStats(conn, game.getGameId()));
+                game.setGameStats(getGameStats(game.getGameId()));
             }
             
             return games;
@@ -215,7 +215,7 @@ public class SQLiteGameRepository implements GameRepository {
             
             // Load game stats for each game
             for (Game game : games) {
-                game.setGameStats(getGameStats(conn, game.getGameId()));
+                game.setGameStats(getGameStats(game.getGameId()));
             }
             
             return games;
@@ -395,18 +395,16 @@ public class SQLiteGameRepository implements GameRepository {
             throw new RepositoryException("Error updating game stats", e);
         }
     }
-    
-    @Override
-    public List<GameStats> getGameStats(int gameId) {
+
+    // Private helper method that accepts a Connection
+    private List<GameStats> getGameStatsInternal(Connection conn, int gameId) throws SQLException {
         List<GameStats> statsList = new ArrayList<>();
         String sql = "SELECT * FROM GameStats WHERE gameID = ?";
-        
-        try (Connection conn = connectionManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, gameId);
             ResultSet rs = pstmt.executeQuery();
-            
+
             while (rs.next()) {
                 GameStats stats = new GameStats();
                 stats.setGameStatsId(rs.getInt("gameStatsID"));
@@ -418,16 +416,24 @@ public class SQLiteGameRepository implements GameRepository {
                 stats.setKicks(rs.getInt("kicks"));
                 stats.setOverallRating(rs.getInt("overallRating"));
                 stats.setAttended(rs.getBoolean("attended"));
-                
+
                 statsList.add(stats);
             }
-            
-            return statsList;
+        }
+
+        return statsList;
+    }
+
+    // Public method implementation required by the interface
+    @Override
+    public List<GameStats> getGameStats(int gameId) {
+        try (Connection conn = connectionManager.getConnection()) {
+            return getGameStatsInternal(conn, gameId);
         } catch (SQLException e) {
-            throw new RepositoryException("Error getting game stats", e);
+            throw new RepositoryException("Error getting game stats for game: " + gameId, e);
         }
     }
-    
+
     @Override
     public List<GameStats> getStatsByPlayer(int playerId) {
         List<GameStats> statsList = new ArrayList<>();
@@ -512,7 +518,7 @@ public class SQLiteGameRepository implements GameRepository {
             
             // Load game stats for each game
             for (Game game : games) {
-                game.setGameStats(getGameStats(conn, game.getGameId()));
+                game.setGameStats(getGameStats(game.getGameId()));
             }
             
             return games;
@@ -543,7 +549,7 @@ public class SQLiteGameRepository implements GameRepository {
             
             // Load game stats for each game
             for (Game game : games) {
-                game.setGameStats(getGameStats(conn, game.getGameId()));
+                game.setGameStats(getGameStats(game.getGameId()));
             }
             
             return games;
